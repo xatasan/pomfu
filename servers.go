@@ -5,6 +5,10 @@ import (
 	"net/url"
 )
 
+// internal server key to fall back onto, if pomfu fails to choose a
+// random server
+const fallback = "subgod"
+
 // This file contains a list of all the pomf servers pomfu
 // knows about and will use to upload files.
 //
@@ -13,20 +17,17 @@ import (
 // the developers
 //
 // based on https://github.com/tsudoko/long-live-pomf
-
 var Servers = map[string]*Pomf{
 	"subgod": {
-		"sub.god.jp",
-		true,
-		mustParseURL("https://sub.god.jp/upload"),
-		mustParseURL("https://sub.god.jp/"),
-		false,
-		32 * (1 << 20),
-		Owner{
-			"Xatasan",
-			mustParseAddress("Xatasan <xatasan@firemail.cc>"),
-			mustParseURL("https://sub.god.jp/~xat/"),
-		},
+		Name:        "sub.god.jp",
+		HtmlAllowed: true,
+		Upload:      mustParseURL("https://sub.god.jp/upload"),
+		About:       mustParseURL("https://sub.god.jp/"),
+		Disabled:    false,
+		MaxSize:     32 * (1 << 20),
+		Owner:       "Xatasan",
+		Email:       mustParseAddress("Xatasan <xatasan@firemail.cc>"),
+		Webmaster:   mustParseURL("https://sub.god.jp/~xat/"),
 	},
 }
 

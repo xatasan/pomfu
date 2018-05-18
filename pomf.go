@@ -7,12 +7,6 @@ import (
 	"time"
 )
 
-type Owner struct {
-	Name  string
-	Email *mail.Address
-	Site  *url.URL
-}
-
 type Pomf struct {
 	Name        string
 	HtmlAllowed bool
@@ -20,12 +14,14 @@ type Pomf struct {
 	About       *url.URL
 	Disabled    bool
 	MaxSize     int
-	Owner       Owner
+	Owner       string
+	Email       *mail.Address
+	Webmaster   *url.URL
 }
 
 func getRndServer(html bool, tries int) *Pomf {
 	if tries >= 20 || len(Servers) == 0 {
-		return Servers["subgod"] // default server
+		return Servers[fallback] // default server
 	}
 
 	var (
