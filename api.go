@@ -6,6 +6,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 )
 
@@ -15,6 +16,15 @@ import (
 type Request struct {
 	name []string
 	out  []io.Reader
+}
+
+// A Response
+type Response []*struct {
+	Name   string   `json:"name"`
+	RawUrl string   `json:"url"`
+	Url    *url.URL `json:"-"`
+	Hash   string   `json:"hash"`
+	Size   int      `json:"size"`
 }
 
 // AddFile is a shorthand for easily adding files to a request. It
@@ -41,7 +51,7 @@ func (r *Request) AddReader(name string, in io.Reader) {
 // unsuccessfully, it empties it's buffers.
 //
 // If p is null, a random server will be chosen
-func (r *Request) Upload(p *Pomf) ([]*Response, error) {
+func (r *Request) Upload(p *Pomf) ([]Response, error) {
 	if r == nil || 0 == len(r.name) {
 		return nil, nil
 	}
