@@ -51,7 +51,7 @@ func (r *Request) AddReader(name string, in io.Reader) {
 // unsuccessfully, it empties it's buffers.
 //
 // If p is null, a random server will be chosen
-func (r *Request) Upload(p *Pomf) ([]Response, error) {
+func (r *Request) Upload(p *Pomf) (Response, error) {
 	if r == nil || 0 == len(r.name) {
 		return nil, nil
 	}
@@ -63,7 +63,7 @@ func (r *Request) Upload(p *Pomf) ([]Response, error) {
 	var (
 		pr, pw = io.Pipe()
 		errch  = make(chan error, 1)
-		resch  = make(chan []*Response, 1)
+		resch  = make(chan Response, 1)
 		mimech = make(chan string, 1)
 	)
 
@@ -102,10 +102,10 @@ func (r *Request) Upload(p *Pomf) ([]Response, error) {
 
 		dec := json.NewDecoder(resp.Body)
 		var data struct {
-			Success     bool        `json:"success"`
-			Errorcode   int         `json:"errorcode"`
-			Description string      `json:"description"`
-			Files       []*Response `json:"files"`
+			Success     bool     `json:"success"`
+			Errorcode   int      `json:"errorcode"`
+			Description string   `json:"description"`
+			Files       Response `json:"files"`
 		}
 
 		err = dec.Decode(&data)
@@ -133,6 +133,13 @@ func (r *Request) Upload(p *Pomf) ([]Response, error) {
 	case err := <-errch:
 		return nil, err
 	case res := <-resch:
+
 		return res, nil
 	}
+}
+
+func Upload(name string, in io.Reader) (Response, error) {
+	var req Request
+	req.AddReader(name, in)
+	return req.Upload(nil)
 }
