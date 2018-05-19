@@ -20,7 +20,7 @@ func list() {
 	for name, pomf := range pomfu.Servers {
 		fmt.Fprintf(out, "%s\t%s\t%s\t%s\t%t\t%t\t%s\n",
 			name, pomf.Name, pomf.About, byteSize(pomf.MaxSize), !pomf.Disabled,
-			pomf.HtmlAllowed, pomf.Owner.Email)
+			pomf.HtmlAllowed, pomf.Email)
 	}
 	out.Flush()
 }
