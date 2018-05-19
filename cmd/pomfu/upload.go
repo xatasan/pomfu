@@ -8,6 +8,8 @@ import (
 	"github.com/xatasan/pomfu"
 )
 
+// upload the files corresponding to the arguments passed in the
+// args. If args is empty, use the standard input.
 func upload(args []string) {
 	if !noConf {
 		pomfu.Setup()
@@ -52,8 +54,8 @@ func upload(args []string) {
 	}
 
 	out := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-	for _, r := range resp {
-		fmt.Fprintf(out, "%s\t%s\n", r.Name, r.Url)
+	for name, ui := range resp {
+		fmt.Fprintf(out, "%s\t%s\n", name, ui.Url)
 	}
 	out.Flush()
 }

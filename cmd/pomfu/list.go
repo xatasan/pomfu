@@ -8,6 +8,8 @@ import (
 	"github.com/xatasan/pomfu"
 )
 
+// print a formatted list of all the servers the pomfu client knows
+// about
 func list() {
 	if !noConf {
 		pomfu.Setup()

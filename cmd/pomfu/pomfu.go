@@ -7,6 +7,8 @@ var (
 	server                string
 )
 
+// start pomfu: parse flags and either list arguments (if -l was
+// specified) or start uploading.
 func main() {
 	flag.BoolVar(&noConf, "n", false, "don't read the configuration file")
 	flag.BoolVar(&listSrv, "l", false, "list available servers")

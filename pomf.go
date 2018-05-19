@@ -7,6 +7,11 @@ import (
 	"time"
 )
 
+// Pomf corresponds to a server that implements the Pomf-API. It
+// maintains all the metadata and related information that a user might
+// want or need to know about a server.
+//
+// The fields should be coincided constants, and not changed.
 type Pomf struct {
 	Name        string
 	HtmlAllowed bool
@@ -19,6 +24,7 @@ type Pomf struct {
 	Webmaster   *url.URL
 }
 
+// internal method to choose a random server from the Servers list
 func getRndServer(html bool, tries int) *Pomf {
 	if tries >= 20 || len(Servers) == 0 {
 		return Servers[fallback] // default server
@@ -43,6 +49,8 @@ func getRndServer(html bool, tries int) *Pomf {
 	return getRndServer(html, tries+1)
 }
 
+// RandomServer returns a random Server from the Servers list,
+// optionally limited to only those servers that support HTML uploads
 func RandomServer(html bool) *Pomf {
 	return getRndServer(html, 0)
 }

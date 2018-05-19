@@ -7,7 +7,7 @@ import (
 
 const unit = (1 << 10)
 
-// taken from registrars
+// convert a byte count to a human readable representation
 func byteSize(bytes int) string {
 	if bytes < unit {
 		return fmt.Sprintf("%dB", bytes)
