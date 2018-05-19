@@ -14,18 +14,27 @@ import (
 // called. Each new file has to be declared by calling .Name with it's
 // corresponding name. It automatically closes the previous buffer
 type Request struct {
-	name []string
-	out  []io.Reader
+	name  []string
+	out   []io.Reader
+	delay []func(Response) Request
+	subrq []struct {
+		pomf   *Pomf
+		reqest Request
+	}
+	prev Response
 }
 
-// A Response
-type Response []*struct {
-	Name   string   `json:"name"`
-	RawUrl string   `json:"url"`
-	Url    *url.URL `json:"-"`
-	Hash   string   `json:"hash"`
-	Size   int      `json:"size"`
+// The single result of a upload in a UploadInfo struct. This contains
+// the destination, the calculated hash-sum and the size in bytes
+type UploadInfo struct {
+	Url  *url.URL
+	Hash string
+	Size int
 }
+
+// A Response object, that aliases a map, that connects names to upload
+// information.
+type Response map[string]UploadInfo
 
 // AddFile is a shorthand for easily adding files to a request. It
 // automatically closes the previous buffer by calling .Next, and it
@@ -39,7 +48,7 @@ func (r *Request) AddFile(name string) error {
 	return nil
 }
 
-// Next opens a new buffer to read in content via .Read. It has to be
+// AddReader opens a new buffer to read in content via .Read. It has to be
 // called at least once, before one starts using it.
 func (r *Request) AddReader(name string, in io.Reader) {
 	r.out = append(r.out, in)
@@ -52,7 +61,7 @@ func (r *Request) AddReader(name string, in io.Reader) {
 //
 // If p is null, a random server will be chosen
 func (r *Request) Upload(p *Pomf) (Response, error) {
-	if r == nil || 0 == len(r.name) {
+	if r == nil {
 		return nil, nil
 	}
 
@@ -94,18 +103,23 @@ func (r *Request) Upload(p *Pomf) (Response, error) {
 	go func() {
 		url := p.Upload
 		url.Query().Set("output", "json")
-		resp, err := http.Post(url.String(), <-mimech, pr)
+		dres, err := http.Post(url.String(), <-mimech, pr)
 		if err != nil {
 			errch <- err
 			return
 		}
 
-		dec := json.NewDecoder(resp.Body)
+		dec := json.NewDecoder(dres.Body)
 		var data struct {
-			Success     bool     `json:"success"`
-			Errorcode   int      `json:"errorcode"`
-			Description string   `json:"description"`
-			Files       Response `json:"files"`
+			Success     bool   `json:"success"`
+			Errorcode   int    `json:"errorcode"`
+			Description string `json:"description"`
+			Files       []struct {
+				Name   string `json:"name"`
+				RawUrl string `json:"url"`
+				Hash   string `json:"hash"`
+				Size   int    `json:"size"`
+			} `json:"files"`
 		}
 
 		err = dec.Decode(&data)
@@ -118,26 +132,50 @@ func (r *Request) Upload(p *Pomf) (Response, error) {
 				data.Errorcode, p.Name, data.Description)
 			return
 		}
+
+		response := make(Response)
+
 		for _, f := range data.Files {
-			f.Url, err = url.Parse(f.RawUrl)
+			url, err = url.Parse(f.RawUrl)
 			// TODO: maybe fix broken or partial URLs?
 			if err != nil {
 				errch <- err
 				return
 			}
+
+			response[f.Name] = UploadInfo{
+				Size: f.Size,
+				Hash: f.Hash,
+				Url:  url,
+			}
 		}
-		resch <- data.Files
+		resch <- response
 	}()
 
 	select {
 	case err := <-errch:
 		return nil, err
 	case res := <-resch:
+		r.prev = res
+		dres, err := r.processDelays(p)
+		if err != nil {
+			return nil, err
+		}
+		sreq, err := r.processSubreq(merge(res, dres))
+		if err != nil {
+			return nil, err
+		}
+
+		for _, r := range sreq {
+			res = merge(res, r)
+		}
 
 		return res, nil
 	}
 }
 
+// The Upload function offers a simple method for uploading an io.Reader
+// to a random Pomf server.
 func Upload(name string, in io.Reader) (Response, error) {
 	var req Request
 	req.AddReader(name, in)
