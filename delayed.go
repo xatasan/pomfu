@@ -21,6 +21,15 @@ func merge(r1 Response, r2 Response) Response {
 	return r1
 }
 
+func (r *Request) GenSubrequest(p *Pomf) Request {
+	var req Request
+	r.subrq = append(r.subrq, struct {
+		pomf   *Pomf
+		reqest Request
+	}{p, req})
+	return req
+}
+
 // Add a request to be processed after the "regular" requests. This
 // "delayed request" uses a Delayed type (ie. a function from Response
 // -> Request) that "calculates" the "actual" request based on the
