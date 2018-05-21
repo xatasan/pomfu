@@ -1,0 +1,12 @@
+cmd/pomfu/pomfu
+cmd/ppomf/ppomf
+
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+*~
+\#*\#
