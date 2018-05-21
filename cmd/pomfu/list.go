@@ -6,7 +6,22 @@ import (
 	"text/tabwriter"
 
 	"github.com/xatasan/pomfu"
+	"math"
 )
+
+const unit = 1 << 10
+
+// convert a byte count to a human readable representation
+func byteSize(bytes int) string {
+	if bytes < unit {
+		return fmt.Sprintf("%dB", bytes)
+	}
+	b := float64(bytes)
+	exp := math.Floor(math.Log(b) / math.Log(unit))
+	return fmt.Sprintf("%.2g%ciB",
+		b/(math.Pow(unit, exp)),
+		"KMGTPE"[int(exp)-1])
+}
 
 // print a formatted list of all the servers the pomfu client knows
 // about

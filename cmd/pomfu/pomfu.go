@@ -1,10 +1,17 @@
 package main
 
-import "flag"
+import (
+	"flag"
+	"fmt"
+	"os"
+
+	"github.com/xatasan/pomfu"
+)
 
 var (
 	noConf, listSrv, html bool
 	server                string
+	srv                   *pomfu.Pomf
 )
 
 // start pomfu: parse flags and either list arguments (if -l was
@@ -15,6 +22,19 @@ func main() {
 	flag.BoolVar(&html, "H", false, "require random server to support html")
 	flag.StringVar(&server, "s", "", "use this server to upload")
 	flag.Parse()
+
+	if !noConf {
+		pomfu.Setup()
+	}
+
+	if server != "" {
+		var ok bool
+		srv, ok = pomfu.Servers[server]
+		if !ok {
+			fmt.Fprintf(os.Stderr, "No server with key: \"%s\"\n", server)
+			os.Exit(1)
+		}
+	}
 
 	switch {
 	case listSrv:
