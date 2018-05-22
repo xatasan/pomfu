@@ -26,10 +26,6 @@ func byteSize(bytes int) string {
 // print a formatted list of all the servers the pomfu client knows
 // about
 func list() {
-	if !noConf {
-		pomfu.Setup()
-	}
-
 	out := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.DiscardEmptyColumns)
 	fmt.Fprintf(out, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
 		"key", "name", "about", "max size", "enabled",

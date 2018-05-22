@@ -4,8 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
-
-	"github.com/xatasan/pomfu"
 )
 
 const index = `<!DOCTYPE html>
@@ -23,29 +21,27 @@ body{ font-family: arial, sans-serif; max-width: 40em; margin: 1em auto; }
 <br/>
 HTML: <input type="checkbox" name="html" />
 </form>
-<p>
-This server is a <em>pomf proxy</em>. That means that every file you upload
-to this server will be randomly redirected to a <q>real</q> pomf server,
-and it's results will be sent back to the <q>real</q> client.
-<p>
-<strong>Note:</strong> This is a proof-of-concept and a demonstration on how
-to use the Go <a href="https://sub.god.jp/~xat/pomfu">Pomfu</a> library. This
-shoudln't <em>actually</em> be used in practice!
+<p>This server is a <em>pomf proxy</em>, that allows uploads up to %d byte.
+That means that every file you upload to this server will be randomly
+redirected to a <q>real</q> pomf server, and it's results will be sent back
+to the <q>real</q> client.
+<p><strong>Note:</strong> This is a proof-of-concept and a demonstration on
+how to use the Go <a href="https://sub.god.jp/~xat/pomfu">Pomfu</a> library.
+This shoudln't <em>actually</em> be used in practice, since this is just an
+example!
 `
 
+var (
+	noConf bool
+	addr   string
+	limit  = 1 << 10 // 1MB
+)
+
 func main() {
-	var noConf bool
-	var addr string
 
 	flag.BoolVar(&noConf, "n", false, "prevent ppomf from reading the pomfu configuration")
 	flag.StringVar(&addr, "a", ":8080", "address to listen on")
 	flag.Parse()
-
-	//// START MAIN EXAMPLE CODE ////
-	if !noConf {
-		pomfu.Setup()
-	}
-	//// END MAIN EXAMPLE CODE   ////
 
 	http.HandleFunc("/upload", upload)
 	http.HandleFunc("/upload.php", upload)

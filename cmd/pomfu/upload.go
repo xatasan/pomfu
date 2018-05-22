@@ -34,7 +34,7 @@ func upload(args []string) {
 		uploadArgs(req, args)
 	}
 
-	resp, err := req.Upload(srv) // upload request to specified server (see pomfu.go)
+	resp, err := req.UploadTo(srv) // upload request to specified server (see pomfu.go)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while uploading: %s\n", err.Error())
 		os.Exit(1)

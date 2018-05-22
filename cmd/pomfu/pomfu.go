@@ -24,7 +24,7 @@ func main() {
 	flag.Parse()
 
 	if !noConf {
-		pomfu.Setup()
+		pomfu.ReadConfig()
 	}
 
 	if server != "" {

@@ -41,8 +41,11 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//// START MAIN EXAMPLE CODE ////
-	var request pomfu.Request // a request object is created
+	if !noConf { // prevent pomfu from reading it's config if wished
+		pomfu.ReadConfig()
+	}
 
+	var request pomfu.Request // a request object is created
 	for _, file := range form.File["files"] {
 		fh, err := file.Open()
 		if err != nil {
@@ -52,7 +55,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		request.AddReader(file.Filename, fh) // each new form file is added as a io.Reader
 	}
 
-	resp, err := request.Upload(pomfu.RandomServer(html)) // the request is submitted
+	resp, err := request.Upload(html, limit) // the request is submitted
 	if err != nil {
 		fmt.Fprintln(w, err.Error())
 		return
