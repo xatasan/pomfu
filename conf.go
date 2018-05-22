@@ -58,7 +58,7 @@ func parseFile(in io.Reader) (map[string]*Pomf, error) {
 		result  = make(map[string]*Pomf)
 
 		newHeader = regexp.MustCompile("^\\[(\\w+)\\]$")
-		newOption = regexp.MustCompile("^(\\w+)=(.*)$")
+		newOption = regexp.MustCompile("^(\\w+)\\s*=\\s*(.*)$")
 
 		saveRecord = func() error {
 			if current != "" {
