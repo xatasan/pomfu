@@ -1,0 +1,31 @@
+.Dd 5 19, 2018
+.Dt ppomf 1
+.Os
+.Sh NAME
+.Nm ppomf
+.Nd start a pomf proxy server
+.Sh SYNOPSIS
+.Nm pomfu
+.Op Fl n
+.Op Fl a Ar address
+.Sh DESCRIPTION
+On executing
+.Nm
+a HTTP server is started that waits for requests.
+.Sh OPTIONS
+.Bl -tag -width Ds
+.It Fl n
+Prevent
+.Nm
+from reading it's configuration file. See
+.Xr pomfu 5
+to learn learn more about the configuration file.
+.It Fl a Ar address
+Set a address to listen on.
+.El
+.Sh SEE ALSO
+.Xr ppomf 1 ,
+.Xr ppomf 5
+.Sh AUTHORS
+.An -nosplit
+.An Xatasan Aq Mt xatasan@firemail.cc

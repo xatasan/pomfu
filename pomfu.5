@@ -1,0 +1,135 @@
+.Dd 5 19, 2018
+.Dt pomfu 5
+.Os
+.Sh NAME
+.Nm pomfu
+.Nd pomfu configuration file syntax
+.Sh DESCRIPTION
+.Nm
+looks for a
+.Pa .pomfu
+configuration file in
+.Pa ~/$XDG_CONFIG_HOME ,
+.Pa ~/.config
+and finally in
+.Li ~
+itself. After finding the first matching file, it will stop
+searching. If none is found, this is ignored silently.
+.Pp
+Note that other programs, such as
+.Xr kagami 1 ,
+may share this file with
+.Nm
+in case they use the
+.Em pomfu
+Go library.
+.Ss Syntax
+The configuration file is parsed line-wise, where empty line
+.Pq i.e. only white space characters
+and comments
+.Po
+i.e. lines with
+.Lt #
+as their first non-white space character
+.Pc
+are ignored. Comments have to stand on their own lines.
+.Pp
+Each new entry has to be started with a line only containing a name
+surrounded by square brackets, like
+.Bd -literal -offset indent
+.Bq key
+.Ed
+.Pp
+Then
+.Em key
+would be used as a key to intentionally upload a file to this server
+using
+.Li -l .
+If an entry with the same name already exists, either defined internally
+or previously, the old one will be overwritten.
+.Pp
+Every new non-empty and non-comment line up until the next entry header
+has to have the following form
+.Bd -literal -offset indent
+key=value
+.Ed
+.Pp
+Keys must only contain alphanumerical symbols, while the value may
+consist of anything, except for newlines. White-spaces around the
+.Li =
+will be ignored.
+.Pp
+The following key values are recognized
+.Pq all others are regarded as semantic errors
+:
+.Pp
+.Bl -tag -compact
+.It html, htmlallowed
+Current entry supports HTML uploads
+.It off,  noupload, disabled
+Don't use this server when randomly selecting a server. Might still be
+used for uploads using
+.Li -s .
+.It maxsize, max, maximum
+Specifiy the maximal file size this server accepts.
+.It upload, uploadto
+The URL to use for
+.Nm
+to request an upload. Usually the domain followed by
+.Li /upload
+or
+.Li /upload.php .
+.It about, info, admin
+A URL that directs the user to website with information about the
+pomf-server itself
+.It webmaster, website, ownersite
+A URL that directs the user to the server-administrators website.
+.It email, mail, contact
+The server-administrators email address
+.It owner, ownername
+The server-administrators name or pseudonym.
+.It name, specialname
+A prettier name for the current entry, possibly containing white-spaces
+or other non-alphanumeric characters. If no specified, this value
+default to the key that was used in the current entries header.
+.El
+.Pp
+The keys
+.Em upload
+and
+.Em maxsize
+.Pq or their synonyms
+.Sy MUST be specified for each entry ,
+and will be regarded as a mistake if they are not found.
+.Sh EXAMPLES
+.Bd -literal -offset indent
+[some-pomf]
+# 8 megabytes
+max=8388608
+email= anonymous@email.net
+upload=http://somepomf.com/upload.php
+  html=true
+disabled = false
+.Ed
+.Pp
+If this is found in configuration file that is used, a server will be
+added with the key
+.Li some-pomf .
+Note that despite it's irregular formatting
+.Nm
+can parse it properly.
+.Sh FILES
+.Bl -bullet
+.It
+.Pa ~/$XDG_CONFIG_HOME/.pomfu
+.It
+.Pa ~/.config/.pomfu
+.It
+.Pa ~/.pomfu
+.Be
+.Sh SEE ALSO
+.Xr pomfu 1 ,
+.Xr ppomf 1 ,
+.Sh AUTHORS
+.An -nosplit
+.An Xatasan Aq Mt xatasan@firemail.cc
