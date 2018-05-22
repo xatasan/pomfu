@@ -1,11 +1,10 @@
 package pomfu
 
 import (
-	"testing"
-
 	"bytes"
 	"fmt"
 	"strings"
+	"testing"
 )
 
 var tests = []struct {
@@ -30,22 +29,27 @@ upload=http://website.com/upload.php
 		},
 	}, {
 		input: `[server1]
-upload=http//server1.org/pomf/upload
+upload=http//serverone.org/pomf/upload
+maxsize=1000000
+
+[server2]
+max= 100000000
+email=john@servertwo.net
+upload = http://serverstwo.net/u
+# comment in the middle
+ html=true
+[server1]
+upload= http//server1.org/pomf/upload
 maxsize=232000
 off=true
 name=Server One
 
-[server2]
-max=100000000
-email=john@servertwo.net
-upload=http://serverstwo.net/u
-# comment in the middle
- html=true
 [server3]
 uploadto=http://thirdserver.com/upload.php
 about=http://thirdserver.com/about.htm
 webmaster=http://thirdserver.com/contact.htm
-maximum=30000
+
+maximum =30000
 
 
 `,

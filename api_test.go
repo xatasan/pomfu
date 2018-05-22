@@ -1,8 +1,6 @@
 package pomfu
 
 import (
-	"testing"
-
 	"bytes"
 	"fmt"
 	"io"
@@ -10,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strings"
+	"testing"
 )
 
 func generateRandomBuffer() (string, io.Reader) {
@@ -26,7 +25,7 @@ func TestUpload(t *testing.T) {
 		name := text[0:10] + ".txt"
 		resp, err := Upload(name, buffer)
 		if err != nil {
-			t.Skipf("Didn't expect error in upload %d: %v", i, err)
+			t.Skipf("Can't run test because of error: %v", err)
 		}
 
 		if len(resp) != 0 {
@@ -47,7 +46,6 @@ func TestUpload(t *testing.T) {
 				} else if text != string(data) {
 					t.Fatalf("Error while fetching data: Expected \"%s\" but got \"%s\"", text, string(data))
 				}
-				// everything ok
 			}
 		}
 	}

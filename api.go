@@ -1,11 +1,8 @@
 package pomfu
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
-	"mime/multipart"
-	"net/http"
 	"net/url"
 	"os"
 )
@@ -34,12 +31,12 @@ type UploadInfo struct {
 
 // A Response object, that aliases a map, that connects names to upload
 // information.
-type Response map[string]UploadInfo
+type Response map[string]*UploadInfo
 
 // AddFile is a shorthand for easily adding files to a request. It
 // automatically closes the previous buffer by calling .Next, and it
 // doesn't allow further data to be appended on via Write
-func (r *Request) AddFile(name string) error {
+func (r Request) AddFile(name string) error {
 	file, err := os.Open(name)
 	if err != nil {
 		return err
@@ -50,7 +47,7 @@ func (r *Request) AddFile(name string) error {
 
 // AddReader opens a new buffer to read in content via .Read. It has to be
 // called at least once, before one starts using it.
-func (r *Request) AddReader(name string, in io.Reader) {
+func (r Request) AddReader(name string, in io.Reader) {
 	r.out = append(r.out, in)
 	r.name = append(r.name, name)
 }
@@ -59,119 +56,22 @@ func (r *Request) AddReader(name string, in io.Reader) {
 // with the method's argument. After finishing, successfully or
 // unsuccessfully, it empties it's buffers.
 //
-// If p is null, a random server will be chosen
-func (r *Request) Upload(p *Pomf) (Response, error) {
-	if r == nil {
-		return nil, nil
-	}
-
+// Since a server is randomly chosen, one can specify conditions such as
+// the minimum upload size permitted and whether HTML uploads are
+// allowed. But if the conditions are too strict, Upload might fail!
+func (r Request) Upload(html bool, minsize int) (Response, error) {
+	p := getRndServer(html, minsize, 0)
 	if p == nil {
-		p = RandomServer(false)
+		return nil, fmt.Errorf("Failed to choose a random server")
 	}
+	return p.upload(r)
+}
 
-	var (
-		pr, pw = io.Pipe()
-		errch  = make(chan error, 1)
-		resch  = make(chan Response, 1)
-		mimech = make(chan string, 1)
-	)
-
-	go func() {
-		defer pw.Close()
-		mpw := multipart.NewWriter(pw)
-		mimech <- mpw.FormDataContentType()
-
-		for i, name := range r.name {
-			w, err := mpw.CreateFormFile("files", name)
-			if err != nil {
-				errch <- err
-				return
-			}
-			_, err = io.Copy(w, r.out[i])
-			if err != nil {
-				errch <- err
-				return
-			}
-		}
-
-		if err := mpw.Close(); err != nil {
-			errch <- err
-			return
-		}
-	}()
-
-	go func() {
-		url := p.Upload
-		url.Query().Set("output", "json")
-		dres, err := http.Post(url.String(), <-mimech, pr)
-		if err != nil {
-			errch <- err
-			return
-		}
-
-		dec := json.NewDecoder(dres.Body)
-		var data struct {
-			Success     bool   `json:"success"`
-			Errorcode   int    `json:"errorcode"`
-			Description string `json:"description"`
-			Files       []struct {
-				Name   string `json:"name"`
-				RawUrl string `json:"url"`
-				Hash   string `json:"hash"`
-				Size   int    `json:"size"`
-			} `json:"files"`
-		}
-
-		err = dec.Decode(&data)
-		if err != nil {
-			errch <- err
-			return
-		}
-		if !data.Success {
-			errch <- fmt.Errorf("Error while uploading (%d on %s): %s",
-				data.Errorcode, p.Name, data.Description)
-			return
-		}
-
-		response := make(Response)
-
-		for _, f := range data.Files {
-			url, err = url.Parse(f.RawUrl)
-			// TODO: maybe fix broken or partial URLs?
-			if err != nil {
-				errch <- err
-				return
-			}
-
-			response[f.Name] = UploadInfo{
-				Size: f.Size,
-				Hash: f.Hash,
-				Url:  url,
-			}
-		}
-		resch <- response
-	}()
-
-	select {
-	case err := <-errch:
-		return nil, err
-	case res := <-resch:
-		r.prev = res
-		dres, err := r.processDelays(p)
-		if err != nil {
-			return nil, err
-		}
-		sreq, err := r.processSubreq(merge(res, dres))
-		if err != nil {
-			return nil, err
-		}
-
-		for _, r := range sreq {
-			res = merge(res, r)
-		}
-
-		return res, nil
-	}
+// In case one has to manually choose what server to upload the request
+// to, the user can manually pass a reference to Pomf struct, instead of
+// letting Pomfu randomly choose a server.
+func (r Request) UploadTo(p *Pomf) (Response, error) {
+	return p.upload(r)
 }
 
 // The Upload function offers a simple method for uploading an io.Reader
@@ -179,5 +79,5 @@ func (r *Request) Upload(p *Pomf) (Response, error) {
 func Upload(name string, in io.Reader) (Response, error) {
 	var req Request
 	req.AddReader(name, in)
-	return req.Upload(nil)
+	return req.Upload(false, 0)
 }

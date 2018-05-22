@@ -12,20 +12,24 @@ import (
 	"strings"
 )
 
-// looks to find a configuration file, as described in the Setup
-// docstring
+// looks to find a configuration file
 func findConf() (*os.File, error) {
+	file, err := os.Open(os.Getenv("POMFU_CONF"))
+	if err == nil {
+		return file, err
+	}
+
 	confDirName := os.Getenv("XDG_CONFIG_HOME")
 	if confDirName == "" {
 		confDirName = filepath.Join(os.Getenv("HOME"), ".config")
 	}
 
 	fi, err := os.Stat(confDirName)
-	if os.IsNotExist(err) || !fi.Mode().IsDir() {
-		confDirName = os.Getenv("HOME")
+	if !os.IsNotExist(err) || fi.Mode().IsDir() {
+		return os.Open(filepath.Join(confDirName, "pomfu"))
 	}
 
-	return os.Open(filepath.Join(confDirName, "pomfu"))
+	return os.Open(filepath.Join(os.Getenv("HOME"), ".pomfu"))
 }
 
 // parses a configuration file, solely based on it's input. Each record
@@ -131,12 +135,11 @@ func parseFile(in io.Reader) (map[string]*Pomf, error) {
 	return result, nil
 }
 
-// Setup locates, starts processing pomfu's configuration files, which
-// are either to be found in $XDG_CONFIG_HOME/pomfu, ~/.config/pomfu or
-// in the users home directory
+// Setup locates and interprets the pomfu configuration. If syntax
+// mistakes are found, an error is returned.
 //
 // Has to be manually called, otherwise any configuration is ignored
-func Setup() error {
+func ReadConfig() error {
 	conf, err := findConf()
 	if err != nil {
 		return err
@@ -146,7 +149,7 @@ func Setup() error {
 	servers, err := parseFile(conf)
 	if err == nil {
 		for k, v := range servers {
-			Servers[k] = v
+			servers[k] = v
 		}
 	}
 	return err

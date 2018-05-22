@@ -5,19 +5,16 @@ import (
 	"net/url"
 )
 
-// internal server key to fall back onto, if pomfu fails to choose a
-// random server
-const fallback = "subgod"
-
-// This file contains a list of all the pomf servers pomfu
-// knows about and will use to upload files.
+// The following map contains all servers that pomfu knows about by
+// default. The public variable Servers is aliased to this variable, so
+// to hide all the internal details from appearing in godoc
 //
 // If you own one of these servers, and would wish to have
 // your server removed (for whatever reason), please contact
 // the developers
 //
 // based on https://github.com/tsudoko/long-live-pomf
-var Servers = map[string]*Pomf{
+var servers = map[string]*Pomf{
 	"subgod": {
 		Name:        "sub.god.jp",
 		HtmlAllowed: true,
@@ -30,6 +27,10 @@ var Servers = map[string]*Pomf{
 		Webmaster:   mustParseURL("https://sub.god.jp/~xat/"),
 	},
 }
+
+// Servers is a map of all the Pomf servers Pomfu knows without any
+// configuration
+var Servers = servers
 
 // forces parsing URLs
 func mustParseURL(rawurl string) *url.URL {
