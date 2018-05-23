@@ -18,7 +18,8 @@ type Request struct {
 		pomf   *Pomf
 		reqest Request
 	}
-	prev Response
+	prev    Response
+	minsize int64
 }
 
 // The single result of a upload in a UploadInfo struct. This contains
@@ -41,6 +42,11 @@ func (r Request) AddFile(name string) error {
 	if err != nil {
 		return err
 	}
+	stat, err := file.Stat()
+	if err != nil {
+		return err
+	}
+	r.minsize += stat.Size()
 	r.AddReader(file.Name(), file)
 	return nil
 }
@@ -59,7 +65,10 @@ func (r Request) AddReader(name string, in io.Reader) {
 // Since a server is randomly chosen, one can specify conditions such as
 // the minimum upload size permitted and whether HTML uploads are
 // allowed. But if the conditions are too strict, Upload might fail!
-func (r Request) Upload(html bool, minsize int) (Response, error) {
+func (r Request) Upload(html bool, minsize int64) (Response, error) {
+	if minsize <= 0 {
+		minsize = r.minsize
+	}
 	p := getRndServer(html, minsize, 0)
 	if p == nil {
 		return nil, fmt.Errorf("Failed to choose a random server")

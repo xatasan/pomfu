@@ -23,14 +23,14 @@ type Pomf struct {
 	Upload      *url.URL
 	About       *url.URL
 	Disabled    bool
-	MaxSize     int
+	MaxSize     int64
 	Owner       string
 	Email       *mail.Address
 	Webmaster   *url.URL
 }
 
 // internal method to choose a random server from the Servers list
-func getRndServer(html bool, minsize int, tries uint) *Pomf {
+func getRndServer(html bool, minsize int64, tries uint) *Pomf {
 	if tries >= 20 || len(servers) == 0 {
 		return nil
 	}
@@ -41,7 +41,7 @@ func getRndServer(html bool, minsize int, tries uint) *Pomf {
 	)
 
 	for _, v := range servers {
-		if (html && !v.HtmlAllowed) || v.Disabled || v.MaxSize < minsize {
+		if (html && !v.HtmlAllowed) || v.Disabled || (minsize > 0 && (v.MaxSize < minsize)) {
 			chance = 1 / ((1 / chance) - 1)
 			continue
 		}
