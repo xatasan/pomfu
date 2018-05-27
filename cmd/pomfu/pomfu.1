@@ -1,5 +1,5 @@
-.Dd 5 19, 2018
-.Dt pomfu 1
+.Dd May 19, 2018
+.Dt POMFU 1
 .Os
 .Sh NAME
 .Nm pomfu
@@ -11,9 +11,8 @@
 .Op Ar
 .Sh DESCRIPTION
 .Nm
-uploads one or more files to pomf-compatible servers. These are stored
-internally within the binary, but can be updated or added via a
-configuration file, as described in the
+uploads one or more files to pomf-compatible servers.
+These are stored internally within the binary, but can be updated or added via a configuration file, as described in the
 .Sx CONFIGURATION
 section.
 .Pp
@@ -23,8 +22,7 @@ reads from the standard input.
 .Sh OPTIONS
 .Bl -tag -width Ds
 .It Fl H
-When randomly choosing a server, require that it supports uploading HTML
-files.
+When randomly choosing a server, require that it supports uploading HTML files.
 .It Fl l
 Print all servers that
 .Nm
@@ -32,7 +30,8 @@ knows about and exit.
 .It Fl n
 Prevent
 .Nm
-from reading it's configuration file. See
+from reading it's configuration file.
+See
 .Xr pomfu 5 .
 .It Fl s Ar key
 Forces
@@ -45,8 +44,8 @@ knows about, use
 .Li -l .
 .El
 .Sh SEE ALSO
+.Xr ppomf 1 ,
 .Xr pomfu 5
-.Xr ppomf 1
 .Sh AUTHORS
 .An -nosplit
 .An Xatasan Aq Mt xatasan@firemail.cc

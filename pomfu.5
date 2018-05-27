@@ -1,5 +1,5 @@
-.Dd 5 19, 2018
-.Dt pomfu 5
+.Dd May 19, 2018
+.Dt POMFU 5
 .Os
 .Sh NAME
 .Nm pomfu
@@ -7,7 +7,7 @@
 .Sh DESCRIPTION
 Unless the
 .Ev POMFU_CONF
-environmental variable is set, pointing to an existing file, 
+environmental variable is set, pointing to an existing file,
 .Nm
 looks for a
 .Pa .pomfu
@@ -16,8 +16,9 @@ configuration file in
 .Pa ~/.config
 and finally in
 .Li ~
-itself. After finding the first matching file, it will stop
-searching. If none is found, this is ignored silently.
+itself.
+After finding the first matching file, it will stop searching.
+If none is found, this is ignored silently.
 .Pp
 Note that other programs, such as
 .Xr kagami 1 ,
@@ -32,33 +33,30 @@ The configuration file is parsed line-wise, where empty line
 and comments
 .Po
 i.e. lines with
-.Lt #
+.Li #
 as their first non-white space character
 .Pc
-are ignored. Comments have to stand on their own lines.
+are ignored.
+Comments have to stand on their own lines.
 .Pp
-Each new entry has to be started with a line only containing a name
-surrounded by square brackets, like
+Each new entry has to be started with a line only containing a name surrounded by square brackets, like
 .Bd -literal -offset indent
 .Bq key
 .Ed
 .Pp
 Then
 .Em key
-would be used as a key to intentionally upload a file to this server
-using
+would be used as a key to intentionally upload a file to this server using
 .Li -l .
-If an entry with the same name already exists, either defined internally
-or previously, the old one will be overwritten.
+If an entry with the same name already exists, either defined internally or previously, the old one will be overwritten.
 .Pp
-Every new non-empty and non-comment line up until the next entry header
-has to have the following form
+Every new non-empty and non-comment line up until the next entry header has to have the following form
 .Bd -literal -offset indent
 key=value
 .Ed
-.Pp
-Keys must only contain alphanumerical symbols, while the value may
-consist of anything, except for newlines. White-spaces around the
+.Ss Keys
+Keys must only contain alphanumerical symbols, while the value may consist of anything, except for newlines.
+White-spaces around the
 .Li =
 will be ignored.
 .Pp
@@ -66,25 +64,25 @@ The following key values are recognized
 .Pq all others are regarded as semantic errors
 :
 .Pp
-.Bl -tag -compact
+.Bl -tag -width Ds -compact
 .It Li html , htmlallowed
 Current entry supports HTML uploads
 .It Li off ,  noupload , disabled
-Don't use this server when randomly selecting a server. Might still be
-used for uploads using
+Don't use this server when randomly selecting a server.
+Might still be used for uploads using
 .Li -s .
 .It Li maxsize , max , maximum
 Specifiy the maximal file size this server accepts.
 .It Li upload , uploadto
 The URL to use for
 .Nm
-to request an upload. Usually the domain followed by
+to request an upload.
+Usually the domain followed by
 .Li /upload
 or
 .Li /upload.php .
 .It Li about , info , admin
-A URL that directs the user to website with information about the
-pomf-server itself
+A URL that directs the user to website with information about the pomf-server itself
 .It Li webmaster , website , ownersite
 A URL that directs the user to the server-administrators website.
 .It Li email , mail , contact
@@ -92,9 +90,8 @@ The server-administrators email address
 .It Li owner , ownername
 The server-administrators name or pseudonym.
 .It Li name , specialname
-A prettier name for the current entry, possibly containing white-spaces
-or other non-alphanumeric characters. If no specified, this value
-default to the key that was used in the current entries header.
+A prettier name for the current entry, possibly containing white-spaces or other non-alphanumeric characters.
+If no specified, this value default to the key that was used in the current entries header.
 .El
 .Pp
 The keys
@@ -104,6 +101,22 @@ and
 .Pq or their synonyms
 .Sy MUST be specified for each entry ,
 and will be regarded as a mistake if they are not found.
+.Sh ENVIRONMENT
+.Bl -tag -width Ds
+.It Ev POMFU_CONF
+Specifies a path for
+.Nm
+to look for a configuration file, before looking for it in the above mentioned locations.
+.El
+.Sh FILES
+.Bl -bullet -compact
+.It
+.Pa ~/$XDG_CONFIG_HOME/.pomfu
+.It
+.Pa ~/.config/.pomfu
+.It
+.Pa ~/.pomfu
+.El
 .Sh EXAMPLES
 .Bd -literal -offset indent
 [some-pomf]
@@ -115,32 +128,14 @@ upload=http://somepomf.com/upload.php
 disabled = false
 .Ed
 .Pp
-If this is found in configuration file that is used, a server will be
-added with the key
+If this is found in configuration file that is used, a server will be added with the key
 .Li some-pomf .
 Note that despite it's irregular formatting
 .Nm
 can parse it properly.
-.Sh FILES
-.Bl -bullet -compact
-.It
-.Pa ~/$XDG_CONFIG_HOME/.pomfu
-.It
-.Pa ~/.config/.pomfu
-.It
-.Pa ~/.pomfu
-.Be
-.Sh ENVIORMENT
-.Bl -tag
-.It Ev POMFU_CONF
-Specifies a path for
-.Nm
-to look for a configuration file, before looking for it in the above
-mentioned locations.
-.Be
 .Sh SEE ALSO
 .Xr pomfu 1 ,
-.Xr ppomf 1 ,
+.Xr ppomf 1
 .Sh AUTHORS
 .An -nosplit
 .An Xatasan Aq Mt xatasan@firemail.cc
